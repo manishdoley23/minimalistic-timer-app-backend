@@ -7,9 +7,3 @@ export const db = new pg.Client({
 	password: "postgres",
 	database: "postgres",
 });
-
-export const query = (
-	text: string,
-	params: any,
-	callback: (err: Error, result: QueryResult<any>) => void
-) => db.query(text, params, callback);
