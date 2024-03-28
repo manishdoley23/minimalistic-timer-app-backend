@@ -81,3 +81,11 @@ export const getPasswordFromDb = async (email: string) => {
 		console.error("Error getting password from db:", error);
 	}
 };
+
+// export const getUserFromEmail = async (email: string) => {
+// 	try {
+// 		const getUserQuery = `
+// 			SELECT
+// 		`
+// 	}
+// }

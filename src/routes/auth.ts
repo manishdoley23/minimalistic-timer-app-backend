@@ -9,6 +9,7 @@ import {
 } from "../db/queries";
 import { hash } from "../utils";
 import "dotenv/config";
+import { generateAccessToken } from "../controllers/user.controller";
 
 const router = Router();
 export default router;
@@ -40,5 +41,10 @@ router.post("/login", async (req, res) => {
 	const passFromDb = await getPasswordFromDb(email);
 	const result = await bcrypt.compare(password, passFromDb);
 	if (!result) res.status(400).json({ message: "Invalid credentials" });
-	else res.status(201).json({ message: "Logged in!! Loading..." });
+	else {
+		const accesstoken = generateAccessToken(email, password);
+		res.status(201)
+			.cookie("accesstoken", accesstoken, { httpOnly: true })
+			.json({ message: "Logged in!! Loading..." });
+	}
 });
