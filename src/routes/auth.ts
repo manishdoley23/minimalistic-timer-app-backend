@@ -42,9 +42,9 @@ router.post("/login", async (req, res) => {
 	const result = await bcrypt.compare(password, passFromDb);
 	if (!result) res.status(400).json({ message: "Invalid credentials" });
 	else {
-		const accesstoken = generateAccessToken(email, password);
+		const accesstoken = await generateAccessToken(email, password);
 		res.status(201)
 			.cookie("accesstoken", accesstoken, { httpOnly: true })
-			.json({ message: "Logged in!! Loading..." });
+			.json({ message: "Logged in!! Loading...", accesstoken });
 	}
 });

@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
+// import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 import mountRoutes from "./routes";
 import { db } from "./db";
@@ -11,11 +12,12 @@ const app = express();
 
 app.use(
 	cors({
-		origin: "http://localhost:5174",
+		origin: "http://localhost:5173",
 		credentials: true,
 	})
 );
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 mountRoutes(app);
 
 db.connect()
