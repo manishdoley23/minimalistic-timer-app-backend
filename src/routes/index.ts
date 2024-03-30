@@ -1,6 +1,6 @@
 import { Express } from "express";
 
-import auth from "./auth";
+import auth from "./auth.routes";
 import check from "./check";
 
 const mountRoutes = (app: Express) => {

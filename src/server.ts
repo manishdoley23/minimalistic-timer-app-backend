@@ -1,12 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-// import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
 import mountRoutes from "./routes";
-import { db } from "./db";
-import { createUsersTable } from "./db/queries";
+import { createUsersTable, db } from "./db";
 
 const app = express();
 
@@ -26,6 +24,7 @@ db.connect()
 	.catch((err) => {
 		throw err;
 	});
+
 app.listen(process.env.PORT || 8081, () => {
 	console.log("Express:" + process.env.PORT || 8081);
 });
