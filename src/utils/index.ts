@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const hash = async (val: string) => {
 	try {
@@ -8,4 +9,8 @@ export const hash = async (val: string) => {
 	} catch (error) {
 		console.error("error in generating hash:", error);
 	}
+};
+
+export const verifyToken = (token: string): string => {
+	return JSON.stringify(jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!));
 };

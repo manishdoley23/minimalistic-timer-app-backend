@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import "dotenv/config";
+import { NextFunction, Request, Response } from "express";
+
+import { verifyToken } from "../utils";
 
 export const authenticateToken = (
 	req: Request,
@@ -12,7 +13,7 @@ export const authenticateToken = (
 		req.header("Authorization")?.replace("Bearer ", "");
 
 	try {
-		const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+		const user = verifyToken(token);
 		console.log("user:", user);
 		next();
 	} catch (error) {

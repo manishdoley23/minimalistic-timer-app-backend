@@ -27,7 +27,7 @@ export const createUsersTable = async () => {
                     userId SERIAL PRIMARY KEY, -- Using SERIAL for auto-incrementing numeric primary key
                     email VARCHAR(100) UNIQUE NOT NULL,
                     password VARCHAR(100) NOT NULL,
-					refreshToken VARCHAR(100)
+					refreshToken VARCHAR(500)
                 );
             `;
 
@@ -88,5 +88,36 @@ export const getPasswordFromDb = async (email: string) => {
 		return password.rows[0].password;
 	} catch (error) {
 		console.error("Error getting password from db:", error);
+	}
+};
+
+export const saveRefreshTokenToDb = async (
+	email: string,
+	refreshToken: string
+) => {
+	try {
+		const updateRefreshTokenQuery = `
+            UPDATE users
+            SET refreshToken = $1
+            WHERE email = $2
+        `;
+		await db.query(updateRefreshTokenQuery, [refreshToken, email]);
+		console.log("Refresh token saved to database successfully");
+	} catch (error) {
+		console.error("Error saving refresh token to database:", error);
+		throw new Error("Error saving refresh token to database");
+	}
+};
+
+export const getUserFromRefresToken = async (refreshtoken: string) => {
+	try {
+		const getRefreshTokenQuery = `
+			SELECT email FROM users WHERE refreshtoken = $1
+		`;
+		const email = await db.query(getRefreshTokenQuery, [refreshtoken]);
+		return email;
+	} catch (error) {
+		console.log("User not found");
+		throw new Error("User not found");
 	}
 };

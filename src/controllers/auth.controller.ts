@@ -3,8 +3,14 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 
-import { hash } from "../utils";
-import { checkIfEmailExists, createNewUser, getPasswordFromDb } from "../db";
+import { hash, verifyToken } from "../utils";
+import {
+	checkIfEmailExists,
+	createNewUser,
+	getPasswordFromDb,
+	getUserFromRefresToken,
+	saveRefreshTokenToDb,
+} from "../db";
 
 const generateAccessAndRefreshToken = async (
 	email: string,
@@ -19,7 +25,7 @@ const generateAccessAndRefreshToken = async (
 			process.env.ACCESS_TOKEN_SECRET!
 		);
 		const refreshToken = jwt.sign(
-			{ password },
+			{ email, password },
 			process.env.ACCESS_TOKEN_SECRET!
 		);
 
@@ -53,18 +59,43 @@ export const loginUser = async (req: Request, res: Response) => {
 
 	console.log("email:", email);
 	const emailExists = await checkIfEmailExists(email);
-	if (!emailExists) res.status(400).json({ message: "Sign up first!!" });
+	if (!emailExists)
+		return res.status(400).json({ message: "Sign up first!!" });
 
 	const passFromDb = await getPasswordFromDb(email);
-	if (!passFromDb) res.status(400).json({ message: "Wrong credentials!" });
+	if (!passFromDb)
+		return res.status(400).json({ message: "Wrong credentials!" });
 	const result = await bcrypt.compare(password, passFromDb);
-	if (!result) res.status(400).json({ message: "Invalid credentials" });
-	else {
-		const { accessToken, refreshToken } =
-			await generateAccessAndRefreshToken(email, password);
+	if (!result)
+		return res.status(400).json({ message: "Invalid credentials" });
+
+	const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+		email,
+		password
+	);
+	try {
+		saveRefreshTokenToDb(email, refreshToken);
 		res.status(201)
 			.cookie("accesstoken", accessToken, { httpOnly: true })
 			.cookie("refreshtoken", refreshToken, { httpOnly: true })
 			.json({ message: "Logged in!! Loading...", accessToken });
+	} catch (error) {
+		res.status(400).send("Something went wrong");
 	}
+};
+
+export const refreshUserToken = async (req: Request, res: Response) => {
+	const cookies = req.cookies;
+	const refreshToken = cookies.refreshtoken;
+	if (!refreshToken) return res.status(401).send("Unathorized");
+	const email = await getUserFromRefresToken(refreshToken);
+	if (!email) return res.status(401).send("No user with the refreshtoken");
+	const user = verifyToken(refreshToken);
+	if (!user) return res.sendStatus(401);
+	const userObj = JSON.parse(user);
+	const { accessToken } = await generateAccessAndRefreshToken(
+		userObj.email,
+		userObj.password
+	);
+	res.status(200).send({ accessToken });
 };
