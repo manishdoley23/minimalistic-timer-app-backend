@@ -12,5 +12,5 @@ export const hash = async (val: string) => {
 };
 
 export const verifyToken = (token: string): string => {
-	return JSON.stringify(jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!));
+	return JSON.stringify(jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!));
 };

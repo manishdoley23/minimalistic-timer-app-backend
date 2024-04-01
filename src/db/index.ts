@@ -84,8 +84,8 @@ export const getPasswordFromDb = async (email: string) => {
             SELECT password FROM users WHERE email = $1
         `;
 
-		const password = await db.query(getPasswordQuery, [email]);
-		return password.rows[0].password;
+		const data = await db.query(getPasswordQuery, [email]);
+		return data.rows[0].password;
 	} catch (error) {
 		console.error("Error getting password from db:", error);
 	}
@@ -109,15 +109,29 @@ export const saveRefreshTokenToDb = async (
 	}
 };
 
-export const getUserFromRefresToken = async (refreshtoken: string) => {
+export const getUserFromRefreshToken = async (refreshtoken: string) => {
 	try {
 		const getRefreshTokenQuery = `
 			SELECT email FROM users WHERE refreshtoken = $1
 		`;
-		const email = await db.query(getRefreshTokenQuery, [refreshtoken]);
-		return email;
+		const data = await db.query(getRefreshTokenQuery, [refreshtoken]);
+		return data.rows[0].email;
 	} catch (error) {
 		console.log("User not found");
-		throw new Error("User not found");
+	}
+};
+
+export const cleartoken = async (email: string) => {
+	try {
+		const clearTokenQuery = `
+			UPDATE users
+			SET refreshtoken = null
+			WHERE email = $1
+		`;
+		await db.query(clearTokenQuery, [email]);
+		console.log("Token cleared");
+	} catch (error) {
+		console.log("Unable to clear token:", error);
+		throw new Error("Unable to clear token");
 	}
 };

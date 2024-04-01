@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import "dotenv/config";
 
 import { hash, verifyToken } from "../utils";
 import {
 	checkIfEmailExists,
+	cleartoken,
 	createNewUser,
 	getPasswordFromDb,
-	getUserFromRefresToken,
+	getUserFromRefreshToken,
 	saveRefreshTokenToDb,
 } from "../db";
 
@@ -18,22 +18,19 @@ const generateAccessAndRefreshToken = async (
 ) => {
 	try {
 		const accessToken = jwt.sign(
-			{
-				email,
-				password,
-			},
-			process.env.ACCESS_TOKEN_SECRET!
+			{ email, password },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: "10s" }
 		);
 		const refreshToken = jwt.sign(
 			{ email, password },
-			process.env.ACCESS_TOKEN_SECRET!
+			process.env.REFRESH_TOKEN_SECRET!,
+			{ expiresIn: "1d" }
 		);
 
 		return { accessToken, refreshToken };
 	} catch (error) {
-		throw new Error(
-			"Something went wrong while generating the access token"
-		);
+		throw new Error("Something went wrong while generating the tokens");
 	}
 };
 
@@ -88,7 +85,7 @@ export const refreshUserToken = async (req: Request, res: Response) => {
 	const cookies = req.cookies;
 	const refreshToken = cookies.refreshtoken;
 	if (!refreshToken) return res.status(401).send("Unathorized");
-	const email = await getUserFromRefresToken(refreshToken);
+	const email = await getUserFromRefreshToken(refreshToken);
 	if (!email) return res.status(401).send("No user with the refreshtoken");
 	const user = verifyToken(refreshToken);
 	if (!user) return res.sendStatus(401);
@@ -97,5 +94,24 @@ export const refreshUserToken = async (req: Request, res: Response) => {
 		userObj.email,
 		userObj.password
 	);
-	res.status(200).send({ accessToken });
+	res.cookie("accesstoken", accessToken, { httpOnly: true })
+		.status(200)
+		.send({ accessToken });
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+	const cookies = req.cookies;
+	const refreshToken = cookies.refreshtoken;
+	if (!refreshToken) return res.status(401).send("Unauthorized");
+	const email = await getUserFromRefreshToken(refreshToken);
+	if (!email) {
+		return res
+			.clearCookie("refreshtoken", { httpOnly: true })
+			.status(204)
+			.send("Logged out");
+	}
+	cleartoken(email);
+	res.clearCookie("refreshtoken", { httpOnly: true })
+		.status(204)
+		.send("Logged out");
 };
