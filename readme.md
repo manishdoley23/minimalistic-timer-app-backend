@@ -2,7 +2,7 @@
 
 ## Description
 
-This is the source code for the medium post on Practical overview of JWT
+This is the source code for the medium post on Practical overview of JWT (https://manishbdoley23.medium.com/practical-overview-of-jwt-90263f2d8afc)
 
 ## Run
 
