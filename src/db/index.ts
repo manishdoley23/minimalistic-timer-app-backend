@@ -1,7 +1,7 @@
-import pg, { QueryResult } from "pg";
+import pg from "pg";
 
 export const db = new pg.Client({
-	host: "localhost",
+	host: process.env.DB_HOSTNAME,
 	port: 5432,
 	user: "postgres",
 	password: "postgres",
