@@ -9,19 +9,19 @@ This is the source code for the medium post on Practical overview of JWT
 Clone the project
 
 ```bash
-  git clone -b blog https://github.com/manishdoley23/minimalistic-timer-app-backend.git
+git clone -b blog https://github.com/manishdoley23/minimalistic-timer-app-backend.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd minimalistic-timer-app-backend
+cd minimalistic-timer-app-backend
 ```
 
 Install dependencies and Start the server
 
 ```bash
-  docker-compose up
+docker-compose up
 ```
 
 Server will start on port: 8081
