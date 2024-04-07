@@ -1,12 +1,19 @@
 import pg, { QueryResult } from "pg";
 
+<<<<<<< Updated upstream
 export const db = new pg.Client({
 	host: "localhost",
+=======
+const dbConfig = {
+	host: process.env.DB_HOSTNAME,
+>>>>>>> Stashed changes
 	port: 5432,
 	user: "postgres",
 	password: "postgres",
 	database: "postgres",
-});
+};
+
+export const db = new pg.Client(dbConfig);
 
 export const createUsersTable = async () => {
 	const checkTableExistsQuery = `
