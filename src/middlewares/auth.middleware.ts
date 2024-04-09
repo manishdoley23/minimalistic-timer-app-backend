@@ -13,7 +13,6 @@ export const authenticateToken = (
 
 	try {
 		const user = verifyToken(token);
-		console.log("user:", user);
 		next();
 	} catch (error) {
 		console.log("Error in auth");
