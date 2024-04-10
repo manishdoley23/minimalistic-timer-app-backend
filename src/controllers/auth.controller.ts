@@ -12,18 +12,15 @@ import {
 	saveRefreshTokenToDb,
 } from "../db";
 
-const generateAccessAndRefreshToken = async (
-	email: string,
-	password: string
-) => {
+const generateAccessAndRefreshToken = async (email: string) => {
 	try {
 		const accessToken = jwt.sign(
-			{ email, password },
+			{ email },
 			process.env.ACCESS_TOKEN_SECRET!,
 			{ expiresIn: "10s" }
 		);
 		const refreshToken = jwt.sign(
-			{ email, password },
+			{ email },
 			process.env.REFRESH_TOKEN_SECRET!,
 			{ expiresIn: "1d" }
 		);
@@ -67,8 +64,7 @@ export const loginUser = async (req: Request, res: Response) => {
 		return res.status(400).json({ message: "Invalid credentials" });
 
 	const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-		email,
-		password
+		email
 	);
 	try {
 		saveRefreshTokenToDb(email, refreshToken);
@@ -90,10 +86,7 @@ export const refreshUserToken = async (req: Request, res: Response) => {
 	const user = verifyToken(refreshToken);
 	if (!user) return res.sendStatus(401);
 	const userObj = JSON.parse(user);
-	const { accessToken } = await generateAccessAndRefreshToken(
-		userObj.email,
-		userObj.password
-	);
+	const { accessToken } = await generateAccessAndRefreshToken(userObj.email);
 	res.cookie("accesstoken", accessToken, { httpOnly: true })
 		.status(200)
 		.send({ accessToken });
